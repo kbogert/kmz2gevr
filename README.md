@@ -16,6 +16,7 @@ Installation for Debian web server
 * sudo python setup.py install
 
 * cd ~
+* git clone https://github.com/kbogert/kmz2gevr.git
 * git clone git://anongit.freedesktop.org/git/exempi.git 
 * cd exempi
 * patch -p1 < ~/kmz2gevr/exempi.patch
@@ -27,9 +28,7 @@ Installation for Debian web server
 >export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 
-* cd ~
-* git clone https://github.com/kbogert/kmz2gevr.git
-* cd kmz2gevr
+* cd ~/kmz2gevr
 * sudo python setup.py install
 
 * cd /etc/apache2/mods-enabled
