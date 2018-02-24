@@ -1,0 +1,71 @@
+syntax = "proto2";
+
+message GEVRPlace {
+   
+   message Summary {
+        repeated string location = 1;
+        required string copyright = 2;
+        required int32 unknown1 = 3;
+        required int32 unknown2 = 4;
+        required int32 unknown3 = 5;
+        required int32 unknown4 = 6;
+   }
+
+   message Places {
+
+     message Place {
+
+       message Location {
+
+           message LatLon {
+               required double lat = 1;
+               required double lon = 2;
+              required  double earthRadius = 3;
+           }
+
+           message PicParams {
+               required double roll = 1;
+               required double weirdAltitude = 2;
+              required  double pitch = 3;
+           }
+           
+           enum ViewMode {
+               UNKNOWN0 = 0;
+               UNKNOWN1 = 1;
+               EARTH_IN_FRONT = 2;
+               EARTH_BELOW = 3;
+           }
+
+           required LatLon latLong = 1;
+           required PicParams picParams = 2;
+
+           required double heading = 3;
+           required ViewMode viewMode = 4;
+           required double elevation = 5;
+           required ViewMode unknown3 = 6;
+       }
+   
+
+       message TimeStamp {
+
+	   required int32 year = 1;
+           required int32 month = 2;
+           required int32 day = 3;
+           required int32 hour = 4;
+           required int32 minute = 5;
+           required int32 second = 6;
+       }
+
+       required string Title = 1;
+       required string SubTitle = 2;
+       required Location location = 3;
+       required TimeStamp time = 4;
+
+     }
+
+     required Place savedPlace = 1;
+   }
+
+  required  Summary summary = 1;
+   required Places places = 2;
+}

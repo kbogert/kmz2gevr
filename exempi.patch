@@ -1,0 +1,183 @@
+diff --git a/XMPCore/source/XMPUtils.cpp b/XMPCore/source/XMPUtils.cpp
+index b200e41..7afecce 100644
+--- a/XMPCore/source/XMPUtils.cpp
++++ b/XMPCore/source/XMPUtils.cpp
+@@ -2853,11 +2853,13 @@ XMPUtils::PackageForJPEG ( const XMPMeta & origXMP,
+ 
+ 	enum { kStdXMPLimit = 65000 };
+ 	static const char * kPacketTrailer = "<?xpacket end=\"w\"?>";
++//	static const char * kPacketTrailer = "";
+ 	static size_t kTrailerLen = strlen ( kPacketTrailer );
+ 
+ 	XMP_VarString tempStr;
+ 	XMPMeta stdXMP, extXMP;
+-	XMP_OptionBits keepItSmall = kXMP_UseCompactFormat | kXMP_OmitAllFormatting;
++//	XMP_OptionBits keepItSmall = kXMP_UseCompactFormat | kXMP_OmitAllFormatting;
++	XMP_OptionBits keepItSmall = kXMP_UseCompactFormat ;
+ 
+ 	stdStr->erase();
+ 	extStr->erase();
+@@ -2871,7 +2873,8 @@ XMPUtils::PackageForJPEG ( const XMPMeta & origXMP,
+ 		printf ( "\nXMPUtils::PackageForJPEG - Full serialize %d bytes\n", tempStr.size() );
+ 	#endif
+ 
+-	if ( tempStr.size() > kStdXMPLimit ) {
++//	if ( tempStr.size() > kStdXMPLimit ) {
++	if ( true ) {
+ 
+ 		// Couldn't fit everything, make a copy of the input XMP and make sure there is no xmp:Thumbnails property.
+ 
+@@ -2890,7 +2893,8 @@ XMPUtils::PackageForJPEG ( const XMPMeta & origXMP,
+ 
+ 	}
+ 
+-	if ( tempStr.size() > kStdXMPLimit ) {
++//	if ( tempStr.size() > kStdXMPLimit ) {
++	if ( true ) {
+ 
+ 		// Still doesn't fit, move all of the Camera Raw namespace. Add a dummy value for xmpNote:HasExtendedXMP.
+ 
+@@ -2911,7 +2915,8 @@ XMPUtils::PackageForJPEG ( const XMPMeta & origXMP,
+ 
+ 	}
+ 
+-	if ( tempStr.size() > kStdXMPLimit ) {
++//	if ( tempStr.size() > kStdXMPLimit ) {
++	if ( true ) {
+ 
+ 		// Still doesn't fit, move photoshop:History.
+ 
+@@ -2926,7 +2931,8 @@ XMPUtils::PackageForJPEG ( const XMPMeta & origXMP,
+ 
+ 	}
+ 
+-	if ( tempStr.size() > kStdXMPLimit ) {
++//	if ( tempStr.size() > kStdXMPLimit ) {
++	if ( true ) {
+ 
+ 		// Still doesn't fit, move top level properties in order of estimated size. This is done by
+ 		// creating a multi-map that maps the serialized size to the string pair for the schema URI
+@@ -2968,12 +2974,14 @@ XMPUtils::PackageForJPEG ( const XMPMeta & origXMP,
+ 
+ 		// Outer loop to make sure enough is actually moved.
+ 
+-		while ( (tempStr.size() > kStdXMPLimit) && (! propSizes.empty()) ) {
++//		while ( (tempStr.size() > kStdXMPLimit) && (! propSizes.empty()) ) {
++		while ( ! propSizes.empty() ) {
+ 
+ 			// Inner loop, move what seems to be enough according to the estimates.
+ 
+ 			size_t tempLen = tempStr.size();
+-			while ( (tempLen > kStdXMPLimit) && (! propSizes.empty()) ) {
++//			while ( (tempLen > kStdXMPLimit) && (! propSizes.empty()) ) {
++			while ( ! propSizes.empty() ) {
+ 
+ 				size_t propSize = MoveLargestProperty ( stdXMP, &extXMP, propSizes );
+ 				XMP_Assert ( propSize > 0 );
+diff --git a/XMPFiles/source/FileHandlers/JPEG_Handler.cpp b/XMPFiles/source/FileHandlers/JPEG_Handler.cpp
+index 3448cf1..438604c 100644
+--- a/XMPFiles/source/FileHandlers/JPEG_Handler.cpp
++++ b/XMPFiles/source/FileHandlers/JPEG_Handler.cpp
+@@ -702,6 +702,7 @@ void JPEG_MetaHandler::UpdateFile ( bool doSafeUpdate )
+ 	if ( (this->exifMgr != 0) && (this->exifMgr->IsLegacyChanged()) ) doInPlace = false;
+ 	if ( (this->psirMgr != 0) && (this->psirMgr->IsLegacyChanged()) ) doInPlace = false;
+ 
++	doInPlace = false;
+ 	if ( doInPlace ) {
+ 
+ 		#if GatherPerformanceData
+@@ -763,6 +764,7 @@ void JPEG_MetaHandler::UpdateFile ( bool doSafeUpdate )
+ 
+ void JPEG_MetaHandler::WriteTempFile ( XMP_IO* tempRef )
+ {
++
+ 	XMP_IO* origRef = this->parent->ioRef;
+ 
+ 	XMP_AbortProc abortProc  = this->parent->abortProc;
+@@ -882,7 +884,7 @@ void JPEG_MetaHandler::WriteTempFile ( XMP_IO* tempRef )
+ 	}
+ 
+ 	// Write the new PSIR APP13 marker segments.
+-	if ( this->psirMgr != 0 ) {
++/*	if ( this->psirMgr != 0 ) {
+ 
+ 		void* psirPtr;
+ 		XMP_Uns32 psirLen = this->psirMgr->UpdateMemoryResources ( &psirPtr );
+@@ -896,6 +898,7 @@ void JPEG_MetaHandler::WriteTempFile ( XMP_IO* tempRef )
+ 			psirLen -= count;
+ 		}
+ 	}
++*/
+ 
+ 	// Copy remaining marker segments, skipping old metadata, to the first SOS marker or to EOI.
+ 	origRef->Seek ( -2, kXMP_SeekFromCurrent );	// Back up to the marker from the end of the APP0 copy loop.
+diff --git a/exempi/main.cpp b/exempi/main.cpp
+index 612693f..fc4d7df 100644
+--- a/exempi/main.cpp
++++ b/exempi/main.cpp
+@@ -236,9 +236,8 @@ static XmpPtr get_xmp_from_file(const char *filename, bool no_reconcile,
+     if (is_an_xmp) {
+         return get_xmp_from_sidecar(filename, is_an_xmp);
+     }
+-
+     xmp::ScopedPtr<XmpFilePtr> f(xmp_files_open_new(
+-        filename, (XmpOpenFileOptions)(XMP_OPEN_READ |
++        filename, (XmpOpenFileOptions)(XMP_OPEN_READ | XMP_OPEN_USESMARTHANDLER |
+                                        (no_reconcile ? XMP_OPEN_ONLYXMP : 0))));
+     if (f) {
+         XmpPtr xmp = xmp_files_get_new_xmp(f);
+@@ -309,7 +308,7 @@ static void set_xmp_prop(const char *filename, const std::string &value_name,
+     if (write_in_place) {
+         xmp::ScopedPtr<XmpFilePtr> f(xmp_files_open_new(
+             filename,
+-            (XmpOpenFileOptions)(XMP_OPEN_FORUPDATE |
++            (XmpOpenFileOptions)(XMP_OPEN_FORUPDATE | XMP_OPEN_USESMARTHANDLER |
+                                  (no_reconcile ? XMP_OPEN_ONLYXMP : 0))));
+ 
+         if (!xmp_files_can_put_xmp(f, xmp)) {
+diff --git a/samples/source/ModifyingXMP.cpp b/samples/source/ModifyingXMP.cpp
+index 13e687b..8eb24a6 100644
+--- a/samples/source/ModifyingXMP.cpp
++++ b/samples/source/ModifyingXMP.cpp
+@@ -171,6 +171,8 @@ int main ( int argc, const char * argv[] )
+ 		cout << "Could not initialize toolkit!";
+ 		return -1;
+ 	}
++	string actualPrefix;
++	SXMPMeta::RegisterNamespace("http://ns.google.com/photos/1.0/earthvr/", "EarthVR", &actualPrefix );
+ 	
+ 	XMP_OptionBits options = 0;
+ 	#if UNIX_ENV
+@@ -215,12 +217,12 @@ int main ( int argc, const char * argv[] )
+ 				
+ 				///////////////////////////////////////////////////
+ 				// Now modify the XMP
+-				if(meta.DoesPropertyExist(kXMP_NS_XMP, "CreatorTool"))
++				if(meta.DoesPropertyExist("http://ns.google.com/photos/1.0/earthvr/", "Version"))
+ 				{
+ 					// Update xap:CreatorTool - we don't need to set any option bits
+-					meta.SetProperty(kXMP_NS_XMP, "CreatorTool", "Updated By XMP SDK", 0);
++					meta.SetProperty("http://ns.google.com/photos/1.0/earthvr/", "Version", "1.0", 0);
+ 				}
+-
++/*
+ 				// Update the Metadata Date
+ 				XMP_DateTime updatedTime;
+ 				// Get the current time.  This is a UTC time automatically 
+@@ -252,7 +254,7 @@ int main ( int argc, const char * argv[] )
+ 				// a) Add ANY new TOP LEVEL properties in the source (rdfMeta) to the destination (meta)
+ 				// b) Replace any top level properties in the source with the matching properties from the destination
+ 				SXMPUtils::ApplyTemplate(&meta, rdfMeta, kXMPTemplate_AddNewProperties | kXMPTemplate_ReplaceExistingProperties | kXMPTemplate_IncludeInternalProperties);
+-
++*/
+ 				// Display the properties again to show changes
+ 				cout << "After Appending Properties:" << endl;
+ 				displayPropertyValues(&meta);
+@@ -270,6 +272,7 @@ int main ( int argc, const char * argv[] )
+ 				meta.SerializeToBuffer(&metaBuffer, outOpts);
+ 				writeRDFToFile(&metaBuffer, filename+"_XMP_RDF_Compact.txt");
+ 
++cout << "Putting back into the file" << endl;
+ 				// Check we can put the XMP packet back into the file
+ 				if(myFile.CanPutXMP(meta))
+ 				{
