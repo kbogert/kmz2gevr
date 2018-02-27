@@ -1,10 +1,10 @@
 Installation for Debian web server
 
 
-* sudo apt-get install python-pip curl autoconf libtool libexpat1 libexpat1-dev zlib1g-dev libboost-dev libboost-test-dev apache2
-* pip install pykml
-* pip install python-xmp-toolkit
-* pip install -U googlemaps
+* sudo apt-get install python-pip curl autoconf libtool libexpat1 libexpat1-dev zlib1g-dev libboost-dev libboost-test-dev apache2 git libxml2-dev libxslt-dev libpython-dev unzip fonts-liberation
+* sudo pip install pykml
+* sudo pip install python-xmp-toolkit
+* sudo pip install -U googlemaps
 
 * cd ~
 * git clone https://github.com/google/protobuf.git
@@ -27,7 +27,7 @@ Installation for Debian web server
 
 >export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
-
+* sudo ldconfig
 * cd ~/kmz2gevr
 * sudo python setup.py install
 
