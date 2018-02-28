@@ -37,6 +37,30 @@ def getkml(kmzfile):
 	kmz = ZipFile(kmzfile, 'r')
 	return parser.parse(kmz.open('doc.kml', 'r')).getroot()
 
+def getPoint(child):
+	entry = {}
+
+	entry['name'] = child.name.text
+	if child.description is not None:
+		entry['desc'] = child.description.text
+	else:
+		entry['desc'] = entry['name']
+
+	if child.Point is not None:
+		# just get the point
+		entry['heading'] = 0.01
+		coords = child.Point.coordinates.text.split(",")
+		entry['lon'] = float(coords[0])
+		entry['lat'] = float(coords[1])
+
+	# if the placemark contains a lookat, prefer this
+	if child.LookAt is not None:
+		entry['heading'] = float(child.LookAt.heading.text)
+	elif child.Camera is not None:
+		entry['heading'] = float(child.Camera.heading.text)
+
+	return entry
+
 # returns list of dicts for each file created
 def kml2gevr(kml, output_dir, desiredHeight, bgColor, textColor):
 
@@ -44,34 +68,20 @@ def kml2gevr(kml, output_dir, desiredHeight, bgColor, textColor):
 	points = []
 
 	# get the point data from the kml file
-
-	for child in kml.Document.Folder.Placemark:
-		entry = {}
-
-		entry['name'] = child.name.text
-		if child.description is not None:
-			entry['desc'] = child.description.text
-		else:
-			entry['desc'] = entry['name']
-
-		# if the placemark contains a lookat, prefer this
-		if child.LookAt is not None:
-			entry['lon'] = float(child.LookAt.longitude.text)
-			entry['lat'] = float(child.LookAt.latitude.text)
-			entry['heading'] = float(child.LookAt.heading.text)
-		elif child.Camera is not None:
-			entry['lon'] = float(child.Camera.longitude.text)
-			entry['lat'] = float(child.Camera.latitude.text)
-			entry['heading'] = float(child.Camera.heading.text)
-		elif child.Point is not None:
-			# just get the point
-			coords = child.Point.coordinates.text.split(",")
-			entry['lon'] = float(coords[0])
-			entry['lat'] = float(coords[1])
-			entry['heading'] = 0.01
+	if kml.Document.Placemark is not None:
+		entry = getPoint(kml.Document.Placemark)
 
 		if ('lon' in entry):	
 			points.append(entry)
+
+	else:
+		# kml file contains multiple points
+		for child in kml.Document.Folder.Placemark:
+
+			entry = getPoint(child)
+
+			if ('lon' in entry):	
+				points.append(entry)
 
 
 	# get elevation from google maps
