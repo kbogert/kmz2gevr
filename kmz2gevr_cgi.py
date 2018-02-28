@@ -63,13 +63,26 @@ def singleFileResponse(points):
 	sys.stdout.write("\r\n")
 	sys.stdout.write(f.read())
 
+def err_redirect():
+	sys.stdout.write("Content-type: text/html;\r\n")
+	sys.stdout.write("Location: /upload.html\r\n\r\n")
+
 
 def process_kmz_file(file_field, height_field, bg_field, text_field):
 	form = cgi.FieldStorage()
 	if not form.has_key(file_field):
+		err_redirect()
 		return
 
 	thefile = form[file_field]
+
+	if not thefile.file:
+		err_redirect()
+		return
+
+	if not thefile.filename:
+		err_redirect()
+		return
 
 	# did they upload a kmz or kml file?
 	if thefile.filename.endswith(".kml") or thefile.filename.endswith(".KML"):
