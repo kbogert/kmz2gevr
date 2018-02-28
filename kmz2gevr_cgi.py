@@ -71,7 +71,11 @@ def process_kmz_file(file_field, height_field, bg_field, text_field):
 
 	thefile = form[file_field]
 
-	kml = kmz2gevr.getkml(thefile.file)
+	# did they upload a kmz or kml file?
+	if thefile.filename.endswith(".kml") or thefile.filename.endswith(".KML"):
+		kml = kmz2gevr.loadkml(thefile.file)
+	else:
+		kml = kmz2gevr.getkml(thefile.file)
 
 	height = float(form[height_field].value)
 	bgColor = hexColorToDecimal(form[bg_field].value) + (255,)

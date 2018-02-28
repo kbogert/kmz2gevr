@@ -33,9 +33,12 @@ import os
 
 font = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
 
+def loadkml(file):
+	return parser.parse(file).getroot()
+
 def getkml(kmzfile):
 	kmz = ZipFile(kmzfile, 'r')
-	return parser.parse(kmz.open('doc.kml', 'r')).getroot()
+	return loadkml(kmz.open('doc.kml', 'r'))
 
 def getPoint(child):
 	entry = {}
