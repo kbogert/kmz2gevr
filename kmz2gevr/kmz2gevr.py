@@ -68,13 +68,15 @@ def kml2gevr(kml, output_dir, desiredHeight, bgColor, textColor):
 	points = []
 
 	# get the point data from the kml file
-	if kml.Document.Placemark is not None:
+
+	try:
 		entry = getPoint(kml.Document.Placemark)
 
 		if ('lon' in entry):	
 			points.append(entry)
 
-	else:
+	except:
+		# Assume exception is due to multiple placemarks in the file
 		# kml file contains multiple points
 		for child in kml.Document.Folder.Placemark:
 
